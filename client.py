@@ -15,14 +15,14 @@ def get_top_performing(period: str):
 
     if response.status_code == 200:
         json_response = response.json()
-        print("Bot Message:", json_response["message"])
-        print("\nFull Data:")
-        for influencer in json_response["data"]:
-            print(influencer)
+        print("\nBot Message:\n")
+        print(json_response["message"])
     else:
         print(f"Error {response.status_code}: {response.json()}")
 
 
+ALLOWED_PERIODS = ["day", "week", "twoWeek", "threeWeek", "month"]
 if __name__ == "__main__":
-    print("Fetching top-performing influencers for 'day' period...\n")
-    get_top_performing("day")
+    print("Fetching top-performing influencers for 'twoWeek' period...\n")
+    for period in ALLOWED_PERIODS:
+        get_top_performing(period)

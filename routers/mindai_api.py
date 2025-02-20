@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from services.mindai.mindai_client import MindAIAPIClient
+from services.mindai.format_utils import format_message
 from schemas import TopPerformingResponse, InfluencerData
 from typing import List
 
@@ -15,19 +16,8 @@ def get_top_performing(period: str):
     """
     try:
         data = client.get_top_performing(period)
-
-        if not data:
-            message = f"No top influencers found for {period}."
-            structured_data = []
-        else:
-            top_influencer = data[0]  # Take the first influencer as the top one
-            message = (
-                f"Top influencer for {period}: {top_influencer['influencerTweeterUserName']}, "
-                f"Success Rate: {top_influencer['successRate']}%, "
-                f"Tokens: {top_influencer['uniqueTokens']}."
-            )
-
-            structured_data = [InfluencerData(**influencer) for influencer in data]
+        structured_data = [InfluencerData(**influencer) for influencer in data]
+        message = format_message(period, structured_data)
 
         return TopPerformingResponse(message=message, data=structured_data)
 
