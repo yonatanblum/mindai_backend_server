@@ -1,5 +1,7 @@
 from typing import List
-from schemas import InfluencerData
+
+from schemas.gainer_schemas import GainerData
+from schemas.kol_schemas import InfluencerData
 
 
 def format_message(period: str, influencers: List[InfluencerData]) -> str:
@@ -20,6 +22,30 @@ def format_message(period: str, influencers: List[InfluencerData]) -> str:
             f"   • Avg ROI: {influencer.avgRoaAtAth:.2f}%\n"
             f"   • Total Calls: {influencer.totalMentions}\n"
             f"   • Success Rate: {influencer.successRate:.1f}%\n"
+        )
+
+    return "\n".join(message_lines)
+
+
+def format_top_gainers_message(period: str, gainers: List[List[GainerData]]) -> str:
+    """
+    Formats the response message for top gainers in a bot-friendly way.
+    """
+    if not gainers:
+        return f"📈 No top gainers found for {period}."
+
+    message_lines = [f"📈 Top Gainers (Past {period.capitalize()}):\n"]
+
+    for i, group in enumerate(gainers[:3]):  # Limit to top 3 groups
+        if not group:
+            continue
+
+        first_gainer = group[0]
+        message_lines.append(
+            f"🔹 {i+1}. {first_gainer.name} ({first_gainer.symbol.upper()})\n"
+            f"   • ROI at ATH: {first_gainer.roaAtAth:.2f}%\n"
+            f"   • Current ROI: {first_gainer.roa:.2f}%\n"
+            f"   • Mentioned by: {first_gainer.twitterUserName}\n"
         )
 
     return "\n".join(message_lines)

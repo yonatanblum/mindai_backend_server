@@ -1,5 +1,6 @@
+# schemas/kol_schemas.py
 from pydantic import BaseModel
-from typing import List, Dict
+from typing import List
 
 
 class InfluencerData(BaseModel):
