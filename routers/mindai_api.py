@@ -1,16 +1,15 @@
-from fastapi import APIRouter, HTTPException
-from services.mindai.mindai_client import MindAIAPIClient
-from services.mindai.format_utils import format_message, format_top_gainers_message
-from schemas import (
-    TopPerformingResponse,
-    TopGainersResponse,
-    InfluencerData,
-    GainerData,
+from fastapi import APIRouter
+from services.mindai.mindai_service import MindAIService
+from services.mindai.format_utils import MessageFormatter
+from schemas.kol_schemas import TopPerformingResponse, InfluencerData
+from schemas.gainer_schemas import TopGainersResponse, GainerData
+from schemas.mentioned_tokens_schemas import (
+    TopMentionedTokensResponse,
+    MentionedTokenData,
 )
-from typing import List
 
 router = APIRouter()
-client = MindAIAPIClient()
+mindai_service = MindAIService()
 
 
 @router.get("/top-performing-kols/{period}", response_model=TopPerformingResponse)
@@ -18,17 +17,12 @@ def get_top_performing(period: str):
     """
     Fetches top-performing influencers and returns a formatted bot message.
     """
-    try:
-        data = client.get_top_performing(period)
-        structured_data = [InfluencerData(**influencer) for influencer in data]
-        message = format_message(period, structured_data)
-
-        return TopPerformingResponse(message=message, data=structured_data)
-
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"External API error: {str(e)}")
+    return mindai_service.fetch_and_format(
+        period,
+        "get_top_performing",
+        InfluencerData,
+        MessageFormatter.format_top_performing_kols,
+    )
 
 
 @router.get("/top-gainers/{period}", response_model=TopGainersResponse)
@@ -36,14 +30,19 @@ def get_top_gainers(period: str):
     """
     Fetches top gainers and returns a formatted bot message.
     """
-    try:
-        data = client.get_top_gainers(period)
-        structured_data = [[GainerData(**gainer) for gainer in group] for group in data]
-        message = format_top_gainers_message(period, structured_data)
+    return mindai_service.fetch_and_format(
+        period, "get_top_gainers", GainerData, MessageFormatter.format_top_gainers
+    )
 
-        return TopGainersResponse(message=message, data=structured_data)
 
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"External API error: {str(e)}")
+@router.get("/top-mentioned-tokens/{period}", response_model=TopMentionedTokensResponse)
+def get_top_mentioned_tokens(period: str):
+    """
+    Fetches the most mentioned tokens and returns a formatted bot message.
+    """
+    return mindai_service.fetch_and_format(
+        period,
+        "get_top_mentioned_tokens",
+        MentionedTokenData,
+        MessageFormatter.format_top_mentioned_tokens,
+    )

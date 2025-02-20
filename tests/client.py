@@ -9,10 +9,6 @@ BASE_URL = f"http://{SERVER_HOST}:{SERVER_PORT}"
 def fetch_and_print(endpoint: str, period: str, label: str):
     """
     Generic function to send a request to the FastAPI server and print the bot message.
-
-    :param endpoint: API endpoint (e.g., 'top-performing-kols', 'top-gainers')
-    :param period: Time period ('day', 'week', etc.)
-    :param label: Descriptive label for the message (e.g., 'Top Performing KOLs', 'Top Gainers')
     """
     url = f"{BASE_URL}/{endpoint}/{period}"
     response = requests.get(url)
@@ -26,26 +22,27 @@ def fetch_and_print(endpoint: str, period: str, label: str):
 
 
 def get_top_performing(period: str):
-    """
-    Fetch and print the top-performing influencers.
-    """
     fetch_and_print("top-performing-kols", period, "Top Performing KOLs")
 
 
 def get_top_gainers(period: str):
-    """
-    Fetch and print the top gainers.
-    """
     fetch_and_print("top-gainers", period, "Top Gainers")
+
+
+def get_top_mentioned_tokens(period: str):
+    fetch_and_print("top-mentioned-tokens", period, "Most Mentioned Tokens")
 
 
 ALLOWED_PERIODS = ["day", "week", "twoWeek", "threeWeek", "month"]
 if __name__ == "__main__":
-    print("Fetching top-performing influencers and top gainers for 'month' period...\n")
-    get_top_performing("month")
-    get_top_gainers("month")
+    print("Fetching all data for 'month' period...\n")
+
+    # get_top_performing("month")
+    # get_top_gainers("month")
+    get_top_mentioned_tokens("month")
 
     # Uncomment to fetch for all periods
     # for period in ALLOWED_PERIODS:
     #     get_top_performing(period)
     #     get_top_gainers(period)
+    #     get_top_mentioned_tokens(period)

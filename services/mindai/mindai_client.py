@@ -43,3 +43,21 @@ class MindAIAPIClient:
             return response.json()
         else:
             response.raise_for_status()
+
+    def get_top_mentioned_tokens(self, period: str) -> List[Dict]:
+        """
+        Fetches the most mentioned tokens based on the specified period.
+        """
+        if period not in ALLOWED_PERIODS:
+            raise ValueError(
+                f"Invalid period. Choose from: {', '.join(ALLOWED_PERIODS)}"
+            )
+
+        endpoint = f"{MIND_AI_BASE_URL}/get-top-mentioned-tokens"
+        params = {"period": period}
+        response = requests.get(endpoint, params=params, headers=self.headers)
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            response.raise_for_status()
