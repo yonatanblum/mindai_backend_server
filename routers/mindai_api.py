@@ -8,7 +8,7 @@ router = APIRouter()
 client = MindAIAPIClient()
 
 
-@router.get("/top-performing/{period}", response_model=TopPerformingResponse)
+@router.get("/top-performing-kols/{period}", response_model=TopPerformingResponse)
 def get_top_performing(period: str):
     """
     REST API endpoint to fetch top-performing influencers.
