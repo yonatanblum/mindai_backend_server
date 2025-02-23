@@ -2,6 +2,7 @@ from typing import List
 from schemas.mentioned_tokens_schemas import MentionedTokenData
 from schemas.kol_schemas import InfluencerData
 from schemas.gainer_schemas import GainerData
+from schemas.best_call_schemas import BestCallData  # ✅ Import BestCallData schema
 from services.mindai.statistics_calculator import StatisticsCalculator
 
 
@@ -98,6 +99,32 @@ class MessageFormatter:
                 f"  ROI: {token.monthlyChange}%\n"
                 f"  Mentions: {token.cashTagMentions}\n"
                 f"  KOLs: {token.influencersAmount}\n"
+            )
+
+        return "\n".join(message_lines)
+
+    @staticmethod
+    def format_best_call(period: str, best_calls: List[BestCallData]) -> str:
+        """
+        Formats the response message for the best-performing calls.
+        """
+        if not best_calls:
+            return f"🌟 No best-performing calls found for {period}."
+
+        medal_emojis = ["🥇", "🥈", "🥉"]
+        message_lines = [f"🌟 Best Performing Calls (Past {period.capitalize()}):\n"]
+
+        for i, call in enumerate(best_calls[:3]):  # Limit to top 3
+            medal = medal_emojis[i] if i < len(medal_emojis) else f"#{i+1}."
+            mention_date = call.createdAt.split("T")[0]  # Extract only date
+
+            message_lines.append(
+                f"{medal} {i+1}. {call.symbol.upper()}\n"
+                f"   • ROI: {call.roaAtAthInPercentage:.2f}%\n"
+                f"   • By: {call.influencerTweeterUserName} (https://x.com/{call.influencerTweeterUserName.strip('@')})\n"
+                f"   • Date: {mention_date}\n"
+                f"   • View Call (https://x.com/{call.influencerTweeterUserName.strip('@')}/status/{call.rawDataId})\n"
+                f"   • View on CoinGecko (https://www.coingecko.com/en/coins/{call.coinGeckoId})\n"
             )
 
         return "\n".join(message_lines)
