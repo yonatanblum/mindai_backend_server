@@ -9,8 +9,8 @@ class MentionedTokenData(BaseModel):
     cashTagMentions: int
     influencersAmount: int
     influencersTweeterUsers: List[str]
-    dailyChange: str
-    weeklyChange: str
+    dailyChange: Optional[str]
+    weeklyChange: Optional[str]
     monthlyChange: Optional[str]  # Allow None values
 
 
