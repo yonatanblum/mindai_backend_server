@@ -66,12 +66,12 @@ if __name__ == "__main__":
 
     # Test each API endpoint
     # get_top_performing("month")
-    # get_top_gainers("month")
+    get_top_gainers("month")
     # get_top_mentioned_tokens("month")
 
     # # Test best-call endpoint with different filters
     # print("\nFetching best call with different filters...\n")
-    get_best_call(period="month")
+    # get_best_call(period="month")
     # get_best_call(influencer_twitter_username="tokenmetricsinc")
     # get_best_call(coin_symbol="btc")
     # get_best_call(period="week", influencer_twitter_username="tokenmetricsinc", coin_symbol="btc")

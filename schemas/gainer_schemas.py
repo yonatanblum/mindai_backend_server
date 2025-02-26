@@ -1,17 +1,17 @@
 # schemas/gainer_schemas.py
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 
 class GainerData(BaseModel):
     name: str
-    roaAtAth: float
-    roa: float
-    coinGeckoId: str
     symbol: str
+    coinGeckoId: str
+    roaAtAth: Optional[float] = None  # Allow missing values
+    roa: Optional[float] = None  # Allow missing values
     mentionPrice: float
     mentionDate: str
-    twitterUserName: str
+    twitterUserName: Optional[str] = None  # Allow missing values
 
 
 class TopGainersResponse(BaseModel):
