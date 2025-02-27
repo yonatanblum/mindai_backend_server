@@ -50,7 +50,10 @@ class MessageFormatter:
                 ),
                 MessageFormatter._format_field("Total Calls", influencer.totalMentions),
                 MessageFormatter._format_field(
-                    "Success Rate", influencer.successRate, is_percentage=True
+                    "Success Rate", round(influencer.successRate, 2), is_percentage=True
+                ),  # ✅ Round success rate
+                MessageFormatter._format_field(
+                    "Unique Tokens", influencer.uniqueTokens
                 ),
             ]
             message_lines.append("\n".join(filter(None, influencer_lines)))
