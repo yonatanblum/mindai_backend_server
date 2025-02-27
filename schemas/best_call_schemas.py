@@ -1,20 +1,20 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 
 class BestCallData(BaseModel):
     text: str
-    createdAt: str
+    createdAt: Optional[str] = None  # Allow missing field
     influencerTweeterUserName: str
     symbol: str
     coinGeckoId: str
     rawDataId: str
-    mentionPrice: float
-    ath: float
-    roa: float
-    roaAtAthInPercentage: float
-    currentPrice: float
-    roaAtCurrentPriceInPercentage: float
+    mentionPrice: Optional[float] = None  # Allow missing field
+    ath: Optional[float] = None  # Allow missing field
+    roa: Optional[float] = None  # Allow missing field
+    roaAtAthInPercentage: Optional[float] = None  # Allow missing field
+    currentPrice: Optional[float] = None  # Allow missing field
+    roaAtCurrentPriceInPercentage: Optional[float] = None  # Allow missing field
 
 
 class BestCallResponse(BaseModel):

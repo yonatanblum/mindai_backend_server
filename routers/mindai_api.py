@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Query
-from services.mindai.format_utils import MessageFormatter
+from services.mindai.formatting.format_utils import MessageFormatter
 from services.mindai.mindai_service import MindAIService
 from schemas.kol_schemas import TopPerformingResponse
 from schemas.gainer_schemas import TopGainersResponse
