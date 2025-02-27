@@ -4,16 +4,24 @@ from typing import List, Optional
 
 
 class GainerData(BaseModel):
+    """Schema for a single gainer entry."""
+
+    rawDataId: str
+    text: str
+    influencerTweeterUserName: str
     name: str
     symbol: str
     coinGeckoId: str
-    roaAtAth: Optional[float] = None  # Allow missing values
-    roa: Optional[float] = None  # Allow missing values
     mentionPrice: float
+    currentPrice: float
+    roaAtCurrentPriceInPercentage: Optional[float] = None  # Ensure compatibility
+    ath: Optional[float] = None
+    roaAtAthInPercentage: Optional[float] = None  # New field name matches API
     mentionDate: str
-    twitterUserName: Optional[str] = None  # Allow missing values
 
 
 class TopGainersResponse(BaseModel):
+    """Schema for the entire response containing multiple gainer groups."""
+
     message: str
-    data: List[List[GainerData]]
+    data: List[List[GainerData]]  # Nested lists to match API response

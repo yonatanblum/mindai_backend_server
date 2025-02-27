@@ -1,22 +1,27 @@
+# schemas/best_call_schemas.py
 from pydantic import BaseModel
 from typing import List, Optional
 
 
 class BestCallData(BaseModel):
+    """Schema for a single best call entry."""
+
+    rawDataId: str
     text: str
-    createdAt: Optional[str] = None  # Allow missing field
     influencerTweeterUserName: str
+    name: str
     symbol: str
     coinGeckoId: str
-    rawDataId: str
-    mentionPrice: Optional[float] = None  # Allow missing field
-    ath: Optional[float] = None  # Allow missing field
-    roa: Optional[float] = None  # Allow missing field
-    roaAtAthInPercentage: Optional[float] = None  # Allow missing field
-    currentPrice: Optional[float] = None  # Allow missing field
-    roaAtCurrentPriceInPercentage: Optional[float] = None  # Allow missing field
+    mentionPrice: Optional[float] = None
+    currentPrice: Optional[float] = None
+    roaAtCurrentPriceInPercentage: Optional[float] = None
+    ath: Optional[float] = None
+    roaAtAthInPercentage: Optional[float] = None
+    createdAt: Optional[str] = None  # ✅ Updated to use `mentionDate` from API
 
 
 class BestCallResponse(BaseModel):
+    """Schema for the response containing best calls."""
+
     message: str
-    data: List[BestCallData]  # ✅ Ensure Pydantic expects a list
+    data: List[BestCallData]  # ✅ Ensure response matches API format

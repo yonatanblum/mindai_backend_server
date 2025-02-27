@@ -76,16 +76,33 @@ class MessageFormatter:
             gainer_lines = [
                 f"🔹 {i+1}. {first_gainer.name} ({first_gainer.symbol.upper()})",
                 MessageFormatter._format_field(
-                    "ROI at ATH", first_gainer.roaAtAth, is_percentage=True
+                    "ROI at ATH", first_gainer.roaAtAthInPercentage, is_percentage=True
                 ),
                 MessageFormatter._format_field(
-                    "Current ROI", first_gainer.roa, is_percentage=True
+                    "Current ROI",
+                    first_gainer.roaAtCurrentPriceInPercentage,
+                    is_percentage=True,
                 ),
                 MessageFormatter._format_field(
-                    "Mentioned by", first_gainer.twitterUserName
+                    "Mentioned by",
+                    (
+                        f"@{first_gainer.influencerTweeterUserName}"
+                        if first_gainer.influencerTweeterUserName
+                        else None
+                    ),
+                ),
+                MessageFormatter._format_field(
+                    "Mention Date",
+                    (
+                        first_gainer.mentionDate.split("T")[0]
+                        if first_gainer.mentionDate
+                        else None
+                    ),
                 ),
             ]
-            message_lines.append("\n".join(filter(None, gainer_lines)))
+            message_lines.append(
+                "\n".join(filter(None, gainer_lines))
+            )  # Remove empty fields
 
         return "\n".join(message_lines)
 
@@ -97,6 +114,7 @@ class MessageFormatter:
         if not tokens:
             return f"📊 No tokens mentioned for {period}."
 
+        # Compute statistics using the new StatisticsCalculator class
         overall_roi = StatisticsCalculator.calculate_overall_roi(tokens)
         success_rate = StatisticsCalculator.calculate_success_rate(tokens)
         total_calls = StatisticsCalculator.calculate_total_calls(tokens)
@@ -104,35 +122,34 @@ class MessageFormatter:
         active_kols = sum(token.influencersAmount for token in tokens)
         market_sentiment = StatisticsCalculator.calculate_market_sentiment(tokens)
 
-        message_lines = [TOP_MENTIONED_TOKENS_TITLE.format(period=period.capitalize())]
-        market_stats = [
-            overall_roi,
-            success_rate,
-            total_calls,
-            unique_coins,
-            active_kols,
-            market_sentiment,
-            overall_roi,
+        message_lines = [
+            f"📊 Market Overview (Last {period.capitalize()} Days)\n"
+            f"• Overall ROI: {overall_roi:.2f}%\n"
+            f"• Success Rate: {success_rate:.2f}%\n"
+            f"• Total Calls: {total_calls}\n"
+            f"• Unique Coins: {unique_coins}\n"
+            f"• Active KOLs: {active_kols}\n"
+            f"• Market Sentiment: {market_sentiment}\n"
         ]
 
-        for field, value in zip(MARKET_OVERVIEW_FIELDS, market_stats):
-            message_lines.append(
-                MessageFormatter._format_field(
-                    field, value, is_percentage="ROI" in field
-                )
-            )
+        # ROI Change (mocked for now, replace with actual calculation)
+        roi_change = overall_roi  # Assuming it's based on overall ROI change
+        message_lines.append(f"\n📈 ROI Change: {roi_change:.2f}%\n")
 
         message_lines.append("\n🔥 Trending Coins")
+
         for token in tokens[:5]:  # Show top 5 trending tokens
             token_lines = [
                 f"• ${token.symbol.upper()}",
                 MessageFormatter._format_field(
-                    "ROI", token.monthlyChange, is_percentage=True
+                    "ROI Change", token.monthlyChange, is_percentage=True
                 ),
                 MessageFormatter._format_field("Mentions", token.cashTagMentions),
                 MessageFormatter._format_field("KOLs", token.influencersAmount),
             ]
-            message_lines.append("\n".join(filter(None, token_lines)))
+            message_lines.append(
+                "\n".join(filter(None, token_lines))
+            )  # Remove empty fields
 
         return "\n".join(message_lines)
 
@@ -146,14 +163,24 @@ class MessageFormatter:
 
         for i, call in enumerate(best_calls[:3]):  # Limit to top 3
             medal = MEDAL_EMOJIS[i] if i < len(MEDAL_EMOJIS) else f"#{i+1}."
+
             call_lines = [
                 f"{medal} {i+1}. {call.symbol.upper()}",
                 MessageFormatter._format_field(
-                    "ROI", call.roaAtAthInPercentage, is_percentage=True
+                    "ROI at ATH", call.roaAtAthInPercentage, is_percentage=True
+                ),
+                MessageFormatter._format_field(
+                    "Current ROI",
+                    call.roaAtCurrentPriceInPercentage,
+                    is_percentage=True,
                 ),
                 MessageFormatter._format_field(
                     "By",
-                    f"@{call.influencerTweeterUserName} ({X_PROFILE_URL.format(username=call.influencerTweeterUserName.strip('@'))})",
+                    (
+                        f"@{call.influencerTweeterUserName}"
+                        if call.influencerTweeterUserName
+                        else None
+                    ),
                 ),
                 MessageFormatter._format_field(
                     "Date", call.createdAt.split("T")[0] if call.createdAt else None
@@ -178,6 +205,8 @@ class MessageFormatter:
                     ),
                 ),
             ]
-            message_lines.append("\n".join(filter(None, call_lines)))
+            message_lines.append(
+                "\n".join(filter(None, call_lines))
+            )  # Remove empty fields
 
         return "\n".join(message_lines)
