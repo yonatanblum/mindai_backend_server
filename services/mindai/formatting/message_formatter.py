@@ -46,7 +46,7 @@ class MessageFormatter:
             influencer_lines = [
                 f"{medal} {i+1}. {influencer.influencerTweeterUserName}",
                 MessageFormatter._format_field(
-                    "Avg ROI", influencer.avgRoaAtAth, is_percentage=True
+                    "Avg ROA", influencer.avgRoaAtAth, is_percentage=True
                 ),
                 MessageFormatter._format_field("Total Calls", influencer.totalMentions),
                 MessageFormatter._format_field(
@@ -76,10 +76,10 @@ class MessageFormatter:
             gainer_lines = [
                 f"🔹 {i+1}. {first_gainer.name} ({first_gainer.symbol.upper()})",
                 MessageFormatter._format_field(
-                    "ROI at ATH", first_gainer.roaAtAthInPercentage, is_percentage=True
+                    "ROA at ATH", first_gainer.roaAtAthInPercentage, is_percentage=True
                 ),
                 MessageFormatter._format_field(
-                    "Current ROI",
+                    "Current ROA",
                     first_gainer.roaAtCurrentPriceInPercentage,
                     is_percentage=True,
                 ),
@@ -115,7 +115,7 @@ class MessageFormatter:
             return f"📊 No tokens mentioned for {period}."
 
         # Compute statistics using the new StatisticsCalculator class
-        overall_roi = StatisticsCalculator.calculate_overall_roi(tokens)
+        overall_roa = StatisticsCalculator.calculate_overall_roa(tokens)
         success_rate = StatisticsCalculator.calculate_success_rate(tokens)
         total_calls = StatisticsCalculator.calculate_total_calls(tokens)
         unique_coins = len(tokens)
@@ -124,7 +124,7 @@ class MessageFormatter:
 
         message_lines = [
             f"📊 Market Overview (Last {period.capitalize()} Days)\n"
-            f"• Overall ROI: {overall_roi:.2f}%\n"
+            f"• Overall ROA: {overall_roa:.2f}%\n"
             f"• Success Rate: {success_rate:.2f}%\n"
             f"• Total Calls: {total_calls}\n"
             f"• Unique Coins: {unique_coins}\n"
@@ -132,9 +132,9 @@ class MessageFormatter:
             f"• Market Sentiment: {market_sentiment}\n"
         ]
 
-        # ROI Change (mocked for now, replace with actual calculation)
-        roi_change = overall_roi  # Assuming it's based on overall ROI change
-        message_lines.append(f"\n📈 ROI Change: {roi_change:.2f}%\n")
+        # ROA Change (mocked for now, replace with actual calculation)
+        roa_change = overall_roa  # Assuming it's based on overall ROA change
+        message_lines.append(f"\n📈 ROA Change: {roa_change:.2f}%\n")
 
         message_lines.append("\n🔥 Trending Coins")
 
@@ -142,7 +142,7 @@ class MessageFormatter:
             token_lines = [
                 f"• ${token.symbol.upper()}",
                 MessageFormatter._format_field(
-                    "ROI Change", token.monthlyChange, is_percentage=True
+                    "ROA Change", token.monthlyChange, is_percentage=True
                 ),
                 MessageFormatter._format_field("Mentions", token.cashTagMentions),
                 MessageFormatter._format_field("KOLs", token.influencersAmount),
@@ -167,10 +167,10 @@ class MessageFormatter:
             call_lines = [
                 f"{medal} {i+1}. {call.symbol.upper()}",
                 MessageFormatter._format_field(
-                    "ROI at ATH", call.roaAtAthInPercentage, is_percentage=True
+                    "ROA at ATH", call.roaAtAthInPercentage, is_percentage=True
                 ),
                 MessageFormatter._format_field(
-                    "Current ROI",
+                    "Current ROA",
                     call.roaAtCurrentPriceInPercentage,
                     is_percentage=True,
                 ),

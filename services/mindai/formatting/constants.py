@@ -11,13 +11,13 @@ BEST_CALLS_TITLE = "🌟 Best Performing Calls (Past {period}):\n"
 
 # Market Overview Fields
 MARKET_OVERVIEW_FIELDS = [
-    "Overall ROI",
+    "Overall ROA",
     "Success Rate",
     "Total Calls",
     "Unique Coins",
     "Active KOLs",
     "Market Sentiment",
-    "ROI Change",
+    "ROA Change",
 ]
 
 # URLs

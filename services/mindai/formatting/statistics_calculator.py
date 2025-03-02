@@ -8,17 +8,17 @@ class StatisticsCalculator:
     """
 
     @staticmethod
-    def calculate_overall_roi(tokens: List[MentionedTokenData]) -> float:
+    def calculate_overall_roa(tokens: List[MentionedTokenData]) -> float:
         """
-        Calculates the overall ROI based on token data.
+        Calculates the overall ROA based on token data.
         """
         if not tokens:
             return 0.00
 
-        roi_values = [
+        roa_values = [
             float(token.monthlyChange) if token.monthlyChange else 0 for token in tokens
         ]
-        return sum(roi_values) / len(roi_values) if roi_values else 0.00
+        return sum(roa_values) / len(roa_values) if roa_values else 0.00
 
     @staticmethod
     def calculate_success_rate(tokens: List[MentionedTokenData]) -> float:
@@ -45,7 +45,7 @@ class StatisticsCalculator:
     @staticmethod
     def calculate_market_sentiment(tokens: List[MentionedTokenData]) -> str:
         """
-        Determines market sentiment based on ROI trends.
+        Determines market sentiment based on ROA trends.
         """
         positive_changes = sum(
             1 for token in tokens if float(token.monthlyChange or 0) > 0
