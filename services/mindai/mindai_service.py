@@ -1,7 +1,7 @@
 from fastapi import HTTPException
+from schemas.mindai_schemas.best_call_schemas import BestCallData, BestCallResponse
 from services.mindai.mindai_client import MindAIAPIClient
 from services.mindai.formatting.message_formatter import MessageFormatter
-from schemas.best_call_schemas import BestCallData, BestCallResponse
 from typing import List, Optional, get_args, Type
 from pydantic import BaseModel
 

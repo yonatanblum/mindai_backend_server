@@ -1,8 +1,9 @@
 from typing import List
-from schemas.mentioned_tokens_schemas import MentionedTokenData
-from schemas.kol_schemas import InfluencerData
-from schemas.gainer_schemas import GainerData
-from schemas.best_call_schemas import BestCallData
+
+from schemas.mindai_schemas.best_call_schemas import BestCallData
+from schemas.mindai_schemas.gainer_schemas import GainerData
+from schemas.mindai_schemas.kol_schemas import InfluencerData
+from schemas.mindai_schemas.mentioned_tokens_schemas import MentionedTokenData
 from services.mindai.formatting.statistics_calculator import StatisticsCalculator
 from services.mindai.formatting.constants import (
     MEDAL_EMOJIS,

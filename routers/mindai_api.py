@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Query
+from schemas.mindai_schemas.best_call_schemas import BestCallResponse
+from schemas.mindai_schemas.gainer_schemas import TopGainersResponse
+from schemas.mindai_schemas.mentioned_tokens_schemas import TopMentionedTokensResponse
 from services.mindai.formatting.message_formatter import MessageFormatter
 from services.mindai.mindai_service import MindAIService
-from schemas.kol_schemas import TopPerformingResponse
-from schemas.gainer_schemas import TopGainersResponse
-from schemas.mentioned_tokens_schemas import TopMentionedTokensResponse
-from schemas.best_call_schemas import BestCallResponse
+from schemas.mindai_schemas.kol_schemas import TopPerformingResponse
+
 from typing import Optional
 
 router = APIRouter()

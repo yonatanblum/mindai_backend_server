@@ -1,5 +1,6 @@
 from typing import List
-from schemas.mentioned_tokens_schemas import MentionedTokenData
+
+from schemas.mindai_schemas.mentioned_tokens_schemas import MentionedTokenData
 
 
 class StatisticsCalculator:
