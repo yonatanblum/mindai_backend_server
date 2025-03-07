@@ -5,9 +5,9 @@ import uvicorn
 
 app = FastAPI()
 
-# Include routers
-app.include_router(mindai_api.router)
-app.include_router(query_router.router)  # Register the new router
+# Include routers with prefixes
+app.include_router(mindai_api.router, prefix="/mindai")
+app.include_router(query_router.router, prefix="/query")
 
 if __name__ == "__main__":
     print(f"Running bot backend server on http://{SERVER_HOST}:{SERVER_PORT}")

@@ -1,11 +1,15 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, HTTPException
 from schemas.mindai_schemas.best_call_schemas import BestCallResponse
 from schemas.mindai_schemas.gainer_schemas import TopGainersResponse
 from schemas.mindai_schemas.mentioned_tokens_schemas import TopMentionedTokensResponse
 from services.mindai.formatting.message_formatter import MessageFormatter
 from services.mindai.mindai_service import MindAIService
 from schemas.mindai_schemas.kol_schemas import TopPerformingResponse
-
+from schemas.mindai_schemas.process_query_schema import (
+    ProcessQueryResponse,
+    QueryPayload,
+)
+from services.mindai.query_processor import process_query as process_query_func
 from typing import Optional
 
 router = APIRouter()
@@ -73,3 +77,16 @@ def get_best_call(
         influencer_twitter_username=influencer_twitter_username,
         coin_symbol=coin_symbol,
     )
+
+
+@router.post("/process", response_model=ProcessQueryResponse)
+async def process_query_endpoint(payload: QueryPayload):
+    """
+    Processes a query by calling process_query(query_type, params)
+    and returns the resulting message in the 'message' field.
+    """
+    try:
+        result = await process_query_func(payload.query_type, payload.params)
+        return ProcessQueryResponse(message=result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

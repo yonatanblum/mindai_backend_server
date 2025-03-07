@@ -187,17 +187,6 @@ class MessageFormatter:
                     "Date", call.createdAt.split("T")[0] if call.createdAt else None
                 ),
                 MessageFormatter._format_field(
-                    "View Call",
-                    (
-                        X_STATUS_URL.format(
-                            username=call.influencerTweeterUserName.strip("@"),
-                            status_id=call.rawDataId,
-                        )
-                        if call.rawDataId and call.influencerTweeterUserName
-                        else None
-                    ),
-                ),
-                MessageFormatter._format_field(
                     "View on CoinGecko",
                     (
                         COINGECKO_URL.format(coin_id=call.coinGeckoId)
