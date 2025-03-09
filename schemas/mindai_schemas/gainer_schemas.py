@@ -12,7 +12,7 @@ class GainerData(BaseModel):
     name: str
     symbol: str
     coinGeckoId: str
-    mentionPrice: float
+    mentionPrice: Optional[float]
     currentPrice: float
     roaAtCurrentPriceInPercentage: Optional[float] = None  # Ensure compatibility
     ath: Optional[float] = None

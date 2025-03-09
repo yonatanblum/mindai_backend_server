@@ -52,18 +52,21 @@ class MindAIAPIClient:
         period: Optional[str] = None,
         influencer_twitter_username: Optional[str] = None,
         coin_symbol: Optional[str] = None,
+        sortBy: Optional[str] = "RoaAtAth",  # New optional parameter with default
     ) -> Dict:
-        """
-        Fetches the best call based on optional filters.
-        """
         endpoint = f"{MIND_AI_BASE_URL}/get-best-call"
+        if sortBy is None:
+            sortBy = "RoaAtAth"
         params = {
-            "sortBy": "RoaAtAth",
+            "sortBy": sortBy,
             "period": period,
             "influencerTwitterUserName": influencer_twitter_username,
             "coinSymbol": coin_symbol,
         }
-        params = {key: value for key, value in params.items() if value is not None}
+        # Filter out None and empty string values
+        params = {
+            key: value for key, value in params.items() if value not in (None, "")
+        }
 
         response = requests.get(endpoint, params=params, headers=self.headers)
 

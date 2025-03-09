@@ -142,14 +142,6 @@ class QueryProcessor:
                 params.setdefault("limit", 5)
             elif intent == "top_kols":
                 params.setdefault("days", 7)
-            elif intent in ["recent_calls", "best_calls", "worst_calls"]:
-                params.setdefault("limit", 3)
-                params.setdefault("days", 7)
-
-            # Clean up KOL names
-            for param in ["kol_name", "kol1_name", "kol2_name"]:
-                if param in params:
-                    params[param] = params[param].lower().strip("@")
 
             return intent, params
 

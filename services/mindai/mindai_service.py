@@ -106,24 +106,21 @@ class MindAIService:
         period: Optional[str] = None,
         influencer_twitter_username: Optional[str] = None,
         coin_symbol: Optional[str] = None,
+        sortBy: Optional[str] = None,  # New parameter
     ) -> BestCallResponse:
-        """
-        Fetches the best call and formats the message.
-        Returns a Pydantic schema for consistency.
-        """
         try:
             data = self.client.get_best_call(
                 period=period,
                 influencer_twitter_username=influencer_twitter_username,
                 coin_symbol=coin_symbol,
+                sortBy=sortBy,  # Pass sortBy along
             )
 
-            if not data:  # ✅ Handle empty response
+            if not data:
                 raise HTTPException(
                     status_code=404, detail="No best call data available."
                 )
 
-            # ✅ Convert single dictionary response into a list
             if isinstance(data, dict):
                 data = [data]
 
@@ -131,12 +128,10 @@ class MindAIService:
                 BestCallData(**item) for item in data
             ]
 
-            # ✅ Pass `period` correctly to format message
             message = MessageFormatter.format_best_call(
                 period or "N/A", structured_data
             )
 
-            # ✅ Ensure `data` is passed as a list
             return BestCallResponse(message=message, data=structured_data)
 
         except ValueError as e:

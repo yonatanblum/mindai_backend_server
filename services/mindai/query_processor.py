@@ -58,8 +58,8 @@ async def process_query(query_type: str, params: dict) -> str:
                 MessageFormatter.format_top_performing_kols,
             ),
         }
+        period_value = PeriodConverter.extract_period_from_params(params)
         if query_type in mapping:
-            period_value = PeriodConverter.extract_period_from_params(params)
             fetch_method, output_schema, formatter = mapping[query_type]
             response = mindai_service.fetch_and_format(
                 period_value, fetch_method, output_schema, formatter
@@ -67,17 +67,12 @@ async def process_query(query_type: str, params: dict) -> str:
             return response.message
 
         # Queries handled via fetch_best_call
-        if query_type in ["best_calls", "initial_call"]:
-            # For "best_calls", extract a period; for "initial_call", period is not used.
-            period_value = (
-                PeriodConverter.extract_period_from_params(params)
-                if query_type == "best_calls"
-                else None
-            )
-            influencer = params.get("influencerTwitterUserName")
-            coin_symbol = params.get("coinSymbol", "")
+        if query_type in ["best_call"]:
+            influencer = params.get("influencerTwitterUserName", None)
+            coin_symbol = params.get("coinSymbol", None)
+            sort_by = params.get("sortBy", None)  # New optional sortBy parameter
             response = mindai_service.fetch_best_call(
-                period_value, influencer, coin_symbol
+                period_value, influencer, coin_symbol, sortBy=sort_by
             )
             return response.message
 

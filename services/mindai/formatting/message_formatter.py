@@ -56,6 +56,7 @@ class MessageFormatter:
                 MessageFormatter._format_field(
                     "Unique Tokens", influencer.uniqueTokens
                 ),
+                "\n",
             ]
             message_lines.append("\n".join(filter(None, influencer_lines)))
 
@@ -100,6 +101,7 @@ class MessageFormatter:
                         else None
                     ),
                 ),
+                "\n",
             ]
             message_lines.append(
                 "\n".join(filter(None, gainer_lines))
@@ -117,18 +119,16 @@ class MessageFormatter:
 
         # Compute statistics using the new StatisticsCalculator class
         overall_roa = StatisticsCalculator.calculate_overall_roa(tokens)
-        success_rate = StatisticsCalculator.calculate_success_rate(tokens)
+        # success_rate = StatisticsCalculator.calculate_success_rate(tokens)
         total_calls = StatisticsCalculator.calculate_total_calls(tokens)
-        unique_coins = len(tokens)
         active_kols = sum(token.influencersAmount for token in tokens)
         market_sentiment = StatisticsCalculator.calculate_market_sentiment(tokens)
 
         message_lines = [
-            f"📊 Market Overview (Last {period.capitalize()} Days)\n"
+            f"📊 Market Overview (Last {period.capitalize()})\n"
             f"• Overall ROA: {overall_roa:.2f}%\n"
-            f"• Success Rate: {success_rate:.2f}%\n"
+            # f"• Success Rate: {success_rate:.2f}%\n"
             f"• Total Calls: {total_calls}\n"
-            f"• Unique Coins: {unique_coins}\n"
             f"• Active KOLs: {active_kols}\n"
             f"• Market Sentiment: {market_sentiment}\n"
         ]
@@ -145,7 +145,7 @@ class MessageFormatter:
                 MessageFormatter._format_field(
                     "ROA Change", token.monthlyChange, is_percentage=True
                 ),
-                MessageFormatter._format_field("Mentions", token.cashTagMentions),
+                MessageFormatter._format_field("Calls", token.cashTagMentions),
                 MessageFormatter._format_field("KOLs", token.influencersAmount),
             ]
             message_lines.append(
