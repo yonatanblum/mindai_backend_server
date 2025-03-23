@@ -136,13 +136,6 @@ class QueryProcessor:
                     except:
                         params["days"] = 7
 
-            # Set default values based on intent
-            if intent == "trend_analysis":
-                params.setdefault("days", 1)
-                params.setdefault("limit", 5)
-            elif intent == "top_kols":
-                params.setdefault("days", 7)
-
             return intent, params
 
         except Exception as e:

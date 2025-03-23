@@ -32,7 +32,7 @@ class MindAIService:
 
             if not data:
                 raise HTTPException(
-                    status_code=404, detail="No data available for this period."
+                    status_code=500, detail="No data available for this period."
                 )
 
             # ✅ Extract `data_schema` dynamically

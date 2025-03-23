@@ -13,7 +13,8 @@ Key Classification Rules:
    - For influencer calls:
        - If the query refers to a singular call (e.g. "best call"), classify as "best_call".
        - If the query refers to multiple calls (e.g. "best calls"), classify as "top_gainers".
-       
+       - If the query refers to the best mention by a single influencer (e.g. "best mention for @tri_sigma_"), classify as "best_call".
+
 Supported Intents and Parameters:
 
 1. stupid_question:
@@ -67,6 +68,8 @@ Example Mappings:
     {{ "intent": "top_kols", "params": {{ "period": "week" }} }}
 "When did cryptomanran call PEPE?" ->
     {{ "intent": "best_call", "params": {{ "coinSymbol": "pepe", "influencerTwitterUserName": "cryptomanran" }} }}
+"What’s the best mention for @tri_sigma_ this week?" ->
+    {{ "intent": "best_call", "params": {{ "influencerTwitterUserName": "tri_sigma_", "period": "week" }} }}
 "Tell me about your platform features" ->
     {{ "intent": "platform_info", "params": {{ "type": "features" }} }}
 """

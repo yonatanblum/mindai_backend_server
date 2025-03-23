@@ -1,14 +1,14 @@
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
 
 
 class InfluencerData(BaseModel):
     influencerTweeterUserName: str
     avgRoaAtAth: float
     totalMentions: int
-    successRate: float = Field(
-        ..., ge=0, le=100
-    )  # Ensure successRate is a valid percentage (0-100)
+    successRate: Optional[float] = Field(
+        None, ge=0, le=100
+    )  # Allow None + validate range when present
     uniqueTokens: int
 
 

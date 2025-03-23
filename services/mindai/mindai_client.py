@@ -61,7 +61,7 @@ class MindAIAPIClient:
             "sortBy": sortBy,
             "period": period,
             "influencerTwitterUserName": influencer_twitter_username,
-            "coinSymbol": coin_symbol,
+            "symbol": coin_symbol,
         }
         # Filter out None and empty string values
         params = {
