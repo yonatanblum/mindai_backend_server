@@ -1,6 +1,6 @@
 from schemas.alpha_view.models import TokenRequest
 from utils.file_queue import FileQueue
-from typing import List
+from typing import List, Dict
 
 # Use a shared queue file path
 QUEUE_PATH = r"services/alpha_view/alpha_queue.jsonl"
@@ -17,3 +17,34 @@ def enqueue_token_data(token: TokenRequest):
 def dequeue_token_data() -> List[dict]:
     """Retrieve and clear all queued token data."""
     return file_queue.dequeue_all()
+
+
+def get_token_data_after_timestamp(timestamp: str) -> List[dict]:
+    """Retrieve all token data added after the specified timestamp."""
+    return file_queue.get_entries_after_timestamp(timestamp)
+
+
+def get_all_token_data() -> List[dict]:
+    """Retrieve all token data without clearing the queue."""
+    return file_queue.dequeue_without_removal()
+
+
+def format_token_message(item: Dict) -> str:
+    """
+    Format token data into a readable message.
+
+    Args:
+        item (Dict): Token data dictionary
+
+    Returns:
+        str: Formatted message string
+    """
+    return (
+        f"🧠 *Alpha Token Alert!*\n"
+        f"• *Token:* {item['tokenName']} ({item['tokenSymbol']})\n"
+        f"• *Address:* `{item['tokenAddress']}`\n"
+        f"• *Chain ID:* {item['chain']}\n"
+        f"• *Amount:* {item['amount']}\n"
+        f"• *FDV:* ${item['fdv']:,}\n"
+        f"• *Timestamp:* {item['timestamp']}"
+    )
