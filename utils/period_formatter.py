@@ -3,7 +3,7 @@ from typing import Dict, Any
 
 class PeriodConverter:
     """
-    Converts a number of days or a string period into a valid period.
+    Converts and formats periods between different representations (days, hours, string formats).
     """
 
     ALLOWED_PERIODS = ["day", "week", "twoWeek", "threeWeek", "month"]
@@ -19,6 +19,15 @@ class PeriodConverter:
 
     # Reverse mapping from period names to days
     PERIOD_TO_DAYS_MAPPING = {v: k for k, v in DAYS_MAPPING.items()}
+
+    # Hours to period mapping
+    HOURS_MAPPING = {
+        24: "day",
+        168: "week",  # 7 days
+        336: "twoWeek",  # 14 days
+        504: "threeWeek",  # 21 days
+        720: "month",  # 30 days
+    }
 
     @staticmethod
     def convert_to_period(value) -> str:
@@ -72,3 +81,25 @@ class PeriodConverter:
             )  # Validate and return period
 
         return "week"  # Default to "week" if no valid period is found
+
+    @staticmethod
+    def format_period_text(hours: int) -> str:
+        """
+        Convert period in hours to a readable format.
+
+        Args:
+            hours (int): Period in hours
+
+        Returns:
+            str: Formatted period string
+        """
+        # Check if the hours match a standard period
+        if hours in PeriodConverter.HOURS_MAPPING:
+            return PeriodConverter.HOURS_MAPPING[hours]
+
+        # For custom periods, return the number of hours/days
+        if hours < 24:
+            return f"{hours} hours"
+        else:
+            days = hours // 24
+            return f"{days} days"

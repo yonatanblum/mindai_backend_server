@@ -1,9 +1,14 @@
 from fastapi import HTTPException
 from schemas.mindai_schemas.best_call_schemas import BestCallData, BestCallResponse
+from schemas.mindai_schemas.top_gainers_token_schema import (
+    TopGainerToken,
+    TopGainersTokenResponse,
+)
 from services.mindai.mindai_client import MindAIAPIClient
 from services.mindai.formatting.message_formatter import MessageFormatter
-from typing import List, Optional, get_args, Type
+from typing import List, Optional, get_args, Type, Callable, Dict, Any
 from pydantic import BaseModel
+from utils.period_formatter import PeriodConverter
 
 
 class MindAIService:
@@ -16,33 +21,46 @@ class MindAIService:
 
     def fetch_and_format(
         self,
-        period: str,
         fetch_method: str,
         output_schema: Type[BaseModel],
-        formatter_function,
+        formatter_function: Callable,
+        params: Dict[str, Any] = None,
     ):
         """
         Fetches data from the API and applies the correct formatting.
         Automatically detects `data_schema` from `output_schema`.
-        Supports `List[GainerData]`, `List[List[GainerData]]`, and `Dict` responses.
+        Supports dynamic parameters via the params dictionary.
+
+        Args:
+            fetch_method (str): Name of the client method to call
+            output_schema (Type[BaseModel]): Pydantic schema for the response
+            formatter_function: Function to format the processed data
+            params (dict, optional): Dictionary of parameters to pass to the fetch method
         """
         try:
+            # Get the method from the client
             fetch_func = getattr(self.client, fetch_method)
-            data = fetch_func(period)
+
+            # Call the function with parameters if provided
+            if params:
+                data = fetch_func(**params)
+            else:
+                data = fetch_func()
 
             if not data:
                 raise HTTPException(
-                    status_code=500, detail="No data available for this period."
+                    status_code=500,
+                    detail="No data available for the requested parameters.",
                 )
 
-            # ✅ Extract `data_schema` dynamically
+            # Extract `data_schema` dynamically
             data_schema = self.extract_data_schema(output_schema)
             structured_data = self.process_api_response(data, data_schema)
 
-            # ✅ Generate formatted message
-            message = formatter_function(period, structured_data)
+            # Generate formatted message
+            message = formatter_function(structured_data)
 
-            # ✅ Ensure the response matches `output_schema`
+            # Ensure the response matches `output_schema`
             return output_schema(message=message, data=structured_data)
 
         except ValueError as e:
@@ -88,7 +106,7 @@ class MindAIService:
         Supports List, List[List], and Dict responses.
         """
         # ✅ Handle nested list (List[List[GainerData]])
-        if isinstance(data, list) and isinstance(data[0], list):
+        if isinstance(data, list) and len(data) > 0 and isinstance(data[0], list):
             return [[data_schema(**item) for item in group] for group in data]
 
         # ✅ Handle flat list (List[GainerData])
@@ -106,14 +124,17 @@ class MindAIService:
         period: Optional[str] = None,
         influencer_twitter_username: Optional[str] = None,
         coin_symbol: Optional[str] = None,
-        sortBy: Optional[str] = None,  # New parameter
+        sortBy: Optional[str] = None,
     ) -> BestCallResponse:
+        """
+        Legacy method for fetching best calls. Consider migrating to fetch_and_format.
+        """
         try:
             data = self.client.get_best_call(
                 period=period,
                 influencer_twitter_username=influencer_twitter_username,
                 coin_symbol=coin_symbol,
-                sortBy=sortBy,  # Pass sortBy along
+                sortBy=sortBy,
             )
 
             if not data:
@@ -133,6 +154,64 @@ class MindAIService:
             )
 
             return BestCallResponse(message=message, data=structured_data)
+
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"External API error: {str(e)}")
+
+    def get_top_gainers_token(
+        self,
+        period: int = 24,
+        tokensAmount: int = 5,
+        kolsAmount: int = 3,
+        tokenCategory: str = "top100",
+        sortBy: str = "RoaAtAth",
+    ) -> TopGainersTokenResponse:
+        """
+        Fetches top gainer tokens.
+
+        Args:
+            period (int): Time period in hours (1-720)
+            tokensAmount (int): Number of tokens to return
+            kolsAmount (int): Number of KOLs per token
+            tokenCategory (str): Filter calls by token category
+            sortBy (str): Sorting criteria (RoaAtAth, etc.)
+
+        Returns:
+            TopGainersTokenResponse: Processed top gainer tokens with nested structure
+        """
+        try:
+            # Get raw data from the API
+            data = self.client.get_top_gainers_token(
+                period, tokensAmount, kolsAmount, tokenCategory, sortBy
+            )
+
+            if not data:
+                raise HTTPException(
+                    status_code=404, detail="No top gainer tokens available."
+                )
+
+            # Check if we already have a nested list structure
+            if isinstance(data, list) and len(data) > 0 and isinstance(data[0], list):
+                # Convert each inner list of dictionaries to a list of TopGainerToken objects
+                structured_data = [
+                    [TopGainerToken(**item) for item in group] for group in data
+                ]
+            else:
+                # Convert flat list to a list of lists (each inner list has one item)
+                structured_data = [[TopGainerToken(**item)] for item in data]
+
+            # Format the period for the message using the PeriodConverter
+            formatted_period = PeriodConverter.format_period_text(period)
+
+            # Create a formatted message using the MessageFormatter
+            message = MessageFormatter.format_top_gainers_token(
+                formatted_period, structured_data
+            )
+
+            # Return with formatted message
+            return TopGainersTokenResponse(message=message, data=structured_data)
 
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e))

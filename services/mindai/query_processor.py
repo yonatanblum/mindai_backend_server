@@ -1,5 +1,5 @@
 from utils.logger import Logger
-from utils.period_converter import PeriodConverter
+from utils.period_formatter import PeriodConverter
 from services.mindai.mindai_service import MindAIService
 from schemas.mindai_schemas.gainer_schemas import TopGainersResponse
 from schemas.mindai_schemas.mentioned_tokens_schemas import TopMentionedTokensResponse

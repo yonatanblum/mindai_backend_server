@@ -1,5 +1,5 @@
 import requests
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 from config import MIND_AI_AUTH_KEY
 from services.mindai.constants import MIND_AI_BASE_URL
 
@@ -21,12 +21,36 @@ class MindAIAPIClient:
         else:
             response.raise_for_status()
 
-    def get_top_gainers(self, period: str) -> Dict:
+    def get_top_gainers_token(
+        self,
+        period: int = 24,
+        tokensAmount: int = 5,
+        kolsAmount: int = 3,
+        tokenCategory: str = "top100",
+        sortBy: str = "RoaAtAth",
+    ) -> List[Dict]:
         """
-        Fetches top gainers based on the specified period.
+        Fetches top gainer tokens based on the specified parameters.
+
+        Args:
+            period (int): Time period in hours (1-720)
+            tokensAmount (int): Number of tokens to return
+            kolsAmount (int): Number of KOLs per token
+            tokenCategory (str): Filter calls by token category
+            sortBy (str): Sorting criteria (RoaAtAth, etc.)
+
+        Returns:
+            List[Dict]: List of top gainer tokens
         """
-        endpoint = f"{MIND_AI_BASE_URL}/get-top-gainers"
-        params = {"period": period}
+        endpoint = f"{MIND_AI_BASE_URL}/v1/top-gainers-token"
+        params = {
+            "period": period,
+            "tokensAmount": tokensAmount,
+            "kolsAmount": kolsAmount,
+            "tokenCategory": tokenCategory,
+            "sortBy": sortBy,
+        }
+
         response = requests.get(endpoint, params=params, headers=self.headers)
 
         if response.status_code == 200:

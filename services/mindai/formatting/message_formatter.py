@@ -4,6 +4,7 @@ from schemas.mindai_schemas.best_call_schemas import BestCallData
 from schemas.mindai_schemas.gainer_schemas import GainerData
 from schemas.mindai_schemas.kol_schemas import InfluencerData
 from schemas.mindai_schemas.mentioned_tokens_schemas import MentionedTokenData
+from schemas.mindai_schemas.top_gainers_token_schema import TopGainerToken
 from services.mindai.formatting.statistics_calculator import StatisticsCalculator
 from services.mindai.formatting.constants import (
     MEDAL_EMOJIS,
@@ -63,49 +64,69 @@ class MessageFormatter:
         return "\n".join(message_lines)
 
     @staticmethod
-    def format_top_gainers(period: str, gainers: List[List[GainerData]]) -> str:
-        """Formats the response message for top gainers."""
+    def format_top_gainers_token(
+        period: str, gainers: List[List[TopGainerToken]]
+    ) -> str:
+        """
+        Formats the response message for top gainer tokens with nested structure.
+        Each token in the nested list represents a group of KOLs mentioning the same token.
+
+        Args:
+            period (str): The time period formatted as a readable string
+            gainers (List[List[TopGainerToken]]): Nested list of tokens, where inner lists
+                                               represent the same token mentioned by different KOLs
+
+        Returns:
+            str: Formatted message
+        """
         if not gainers:
             return f"📈 No top gainers found for {period}."
 
         message_lines = [TOP_GAINERS_TITLE.format(period=period.capitalize())]
 
-        for i, group in enumerate(gainers[:3]):  # Limit to top 3 groups
-            if not group:
+        for i, token_group in enumerate(gainers[:5]):  # Limit to top 5
+            if not token_group:
                 continue
 
-            first_gainer = group[0]
-            gainer_lines = [
-                f"🔹 {i+1}. {first_gainer.name} ({first_gainer.symbol.upper()})",
+            # Get the first token from the group (main representative)
+            token = token_group[0]
+
+            # Get unique KOLs who mentioned this token
+            kols = set(t.kolName for t in token_group)
+            kol_text = ", ".join(list(kols)[:3])  # Show up to 3 KOLs
+
+            # Find highest and lowest call prices
+            call_prices = [t.callPrice for t in token_group]
+            price_range = (
+                f"${min(call_prices):.4f}"
+                if min(call_prices) == max(call_prices)
+                else f"${min(call_prices):.4f} - ${max(call_prices):.4f}"
+            )
+
+            # Format call dates
+            call_dates = sorted(t.callDate.split("T")[0] for t in token_group)
+            date_text = (
+                call_dates[0]
+                if len(call_dates) == 1
+                else f"{call_dates[0]} to {call_dates[-1]}"
+            )
+
+            token_lines = [
+                f"🔹 {i+1}. {token.tokenName} ({token.tokenSymbol.upper()})",
                 MessageFormatter._format_field(
-                    "ROA at ATH", first_gainer.roaAtAthInPercentage, is_percentage=True
+                    "ROA at ATH", token.roaAtAth, is_percentage=True
                 ),
                 MessageFormatter._format_field(
-                    "Current ROA",
-                    first_gainer.roaAtCurrentPriceInPercentage,
-                    is_percentage=True,
+                    "Current ROA", token.roa, is_percentage=True
                 ),
-                MessageFormatter._format_field(
-                    "Mentioned by",
-                    (
-                        f"@{first_gainer.influencerTweeterUserName}"
-                        if first_gainer.influencerTweeterUserName
-                        else None
-                    ),
-                ),
-                MessageFormatter._format_field(
-                    "Mention Date",
-                    (
-                        first_gainer.mentionDate.split("T")[0]
-                        if first_gainer.mentionDate
-                        else None
-                    ),
-                ),
+                MessageFormatter._format_field("Mentions", len(token_group)),
+                MessageFormatter._format_field("KOLs", kol_text),
+                MessageFormatter._format_field("Call Prices", price_range),
+                MessageFormatter._format_field("Dates", date_text),
                 "\n",
             ]
-            message_lines.append(
-                "\n".join(filter(None, gainer_lines))
-            )  # Remove empty fields
+
+            message_lines.append("\n".join(filter(None, token_lines)))
 
         return "\n".join(message_lines)
 

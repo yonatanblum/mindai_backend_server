@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query, HTTPException
 from schemas.mindai_schemas.best_call_schemas import BestCallResponse
-from schemas.mindai_schemas.gainer_schemas import TopGainersResponse
 from schemas.mindai_schemas.mentioned_tokens_schemas import TopMentionedTokensResponse
+from schemas.mindai_schemas.top_gainers_token_schema import TopGainersTokenResponse
 from services.mindai.formatting.message_formatter import MessageFormatter
 from services.mindai.mindai_service import MindAIService
 from schemas.mindai_schemas.kol_schemas import TopPerformingResponse
@@ -10,7 +10,7 @@ from schemas.mindai_schemas.process_query_schema import (
     QueryPayload,
 )
 from services.mindai.query_processor import process_query as process_query_func
-from typing import Optional
+from typing import Optional, List
 
 router = APIRouter()
 mindai_service = MindAIService()
@@ -23,26 +23,43 @@ def get_top_performing(
     """
     Fetches top-performing influencers and returns a formatted bot message.
     """
+
+    # Adapt the formatter to match the new signature
+    def adapted_formatter(data):
+        return MessageFormatter.format_top_performing_kols(period, data)
+
     return mindai_service.fetch_and_format(
-        period,
         "get_top_performing",
         TopPerformingResponse,
-        MessageFormatter.format_top_performing_kols,
+        adapted_formatter,
+        {"period": period},
     )
 
 
-@router.get("/top-gainers", response_model=TopGainersResponse)
+@router.get("/top-gainers", response_model=TopGainersTokenResponse)
 def get_top_gainers(
-    period: str = Query(..., description="Time period: day, week, etc.")
+    period: int = Query(
+        24, description="Filter the time period (1-720 hours) for the data end point"
+    ),
+    tokenCategory: str = Query(
+        "top100", description="Filter calls by the token category"
+    ),
+    tokensAmount: int = Query(5, description="Number of tokens to return"),
+    sortBy: str = Query(
+        "RoaAtAth",
+        description="Sorting criteria for token calls based on ROA at current price or ROA at ATH",
+    ),
+    kolsAmount: int = Query(3, description="Number of KOLs to return per token"),
 ):
     """
-    Fetches top gainers and returns a formatted bot message.
+    Fetches top gainer tokens based on the specified parameters.
     """
-    return mindai_service.fetch_and_format(
-        period,
-        "get_top_gainers",
-        TopGainersResponse,
-        MessageFormatter.format_top_gainers,
+    return mindai_service.get_top_gainers_token(
+        period=period,
+        tokensAmount=tokensAmount,
+        kolsAmount=kolsAmount,
+        tokenCategory=tokenCategory,
+        sortBy=sortBy,
     )
 
 
@@ -53,11 +70,16 @@ def get_top_mentioned_tokens(
     """
     Fetches the most mentioned tokens and returns a formatted bot message.
     """
+
+    # Adapt the formatter to match the new signature
+    def adapted_formatter(data):
+        return MessageFormatter.format_top_mentioned_tokens(period, data)
+
     return mindai_service.fetch_and_format(
-        period,
         "get_top_mentioned_tokens",
         TopMentionedTokensResponse,
-        MessageFormatter.format_top_mentioned_tokens,
+        adapted_formatter,
+        {"period": period},
     )
 
 
