@@ -9,6 +9,8 @@ from schemas.mindai_schemas.process_query_schema import (
     ProcessQueryResponse,
     QueryPayload,
 )
+
+# Keep using process_query for backwards compatibility
 from services.mindai.query_processor import process_query as process_query_func
 from typing import Optional, List
 
