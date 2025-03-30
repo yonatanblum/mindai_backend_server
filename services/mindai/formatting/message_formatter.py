@@ -1,14 +1,12 @@
 from typing import List
 
 from schemas.mindai_schemas.best_call_schemas import BestCallData
-from schemas.mindai_schemas.gainer_schemas import GainerData
-from schemas.mindai_schemas.kol_schemas import InfluencerData
 from schemas.mindai_schemas.mentioned_tokens_schemas import MentionedTokenData
 from schemas.mindai_schemas.top_gainers_token_schema import TopGainerToken
+from schemas.mindai_schemas.top_kols_schema import TopKolData
 from services.mindai.formatting.statistics_calculator import StatisticsCalculator
 from services.mindai.formatting.constants import (
     MEDAL_EMOJIS,
-    TOP_PERFORMING_KOLS_TITLE,
     TOP_GAINERS_TITLE,
     TOP_MENTIONED_TOKENS_TITLE,
     BEST_CALLS_TITLE,
@@ -32,36 +30,6 @@ class MessageFormatter:
         return (
             f"   • {label}: {value:.2f}%" if is_percentage else f"   • {label}: {value}"
         )
-
-    @staticmethod
-    def format_top_performing_kols(
-        period: str, influencers: List[InfluencerData]
-    ) -> str:
-        """Formats the response message for top-performing KOLs."""
-        if not influencers:
-            return f"🏆 No top influencers found for {period}."
-
-        message_lines = [TOP_PERFORMING_KOLS_TITLE.format(period=period.capitalize())]
-
-        for i, influencer in enumerate(influencers[:3]):  # Limit to top 3
-            medal = MEDAL_EMOJIS[i] if i < len(MEDAL_EMOJIS) else f"#{i+1}."
-            influencer_lines = [
-                f"{medal} {i+1}. {influencer.influencerTweeterUserName}",
-                MessageFormatter._format_field(
-                    "Avg ROA", influencer.avgRoaAtAth, is_percentage=True
-                ),
-                MessageFormatter._format_field("Total Calls", influencer.totalMentions),
-                MessageFormatter._format_field(
-                    "Success Rate", round(influencer.successRate, 2), is_percentage=True
-                ),  # ✅ Round success rate
-                MessageFormatter._format_field(
-                    "Unique Tokens", influencer.uniqueTokens
-                ),
-                "\n",
-            ]
-            message_lines.append("\n".join(filter(None, influencer_lines)))
-
-        return "\n".join(message_lines)
 
     @staticmethod
     def format_top_gainers_token(
@@ -127,6 +95,43 @@ class MessageFormatter:
             ]
 
             message_lines.append("\n".join(filter(None, token_lines)))
+
+        return "\n".join(message_lines)
+
+    @staticmethod
+    def format_top_kols(period: str, kols: List[TopKolData]) -> str:
+        """
+        Formats the response message for top performing KOLs.
+
+        Args:
+            period (str): The time period formatted as a readable string
+            kols (List[TopKolData]): List of top performing KOLs
+
+        Returns:
+            str: Formatted message
+        """
+        if not kols:
+            return f"🏆 No top KOLs found for {period}."
+
+        message_lines = [f"🏆 Top Performing KOLs (Past {period.capitalize()}):\n"]
+
+        for i, kol in enumerate(kols[:5]):  # Limit to top 5
+            medal = MEDAL_EMOJIS[i] if i < len(MEDAL_EMOJIS) else f"#{i+1}."
+
+            kol_lines = [
+                f"{medal} {i+1}. {kol.kolName}",
+                MessageFormatter._format_field(
+                    "Avg ROA at ATH", kol.avgRoaAtAth, is_percentage=True
+                ),
+                MessageFormatter._format_field("Total Calls", kol.totalCalls),
+                MessageFormatter._format_field(
+                    "Success Rate", kol.successRate, is_percentage=True
+                ),
+                MessageFormatter._format_field("Unique Tokens", kol.uniqueTokens),
+                "\n",
+            ]
+
+            message_lines.append("\n".join(filter(None, kol_lines)))
 
         return "\n".join(message_lines)
 

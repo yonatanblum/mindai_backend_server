@@ -2,15 +2,13 @@ from fastapi import APIRouter, Query, HTTPException
 from schemas.mindai_schemas.best_call_schemas import BestCallResponse
 from schemas.mindai_schemas.mentioned_tokens_schemas import TopMentionedTokensResponse
 from schemas.mindai_schemas.top_gainers_token_schema import TopGainersTokenResponse
+from schemas.mindai_schemas.top_kols_schema import TopKolsResponse
 from services.mindai.formatting.message_formatter import MessageFormatter
 from services.mindai.mindai_service import MindAIService
-from schemas.mindai_schemas.kol_schemas import TopPerformingResponse
 from schemas.mindai_schemas.process_query_schema import (
     ProcessQueryResponse,
     QueryPayload,
 )
-
-# Keep using process_query for backwards compatibility
 from services.mindai.query_processor import process_query as process_query_func
 from typing import Optional, List
 
@@ -18,23 +16,22 @@ router = APIRouter()
 mindai_service = MindAIService()
 
 
-@router.get("/top-performing-kols", response_model=TopPerformingResponse)
-def get_top_performing(
-    period: str = Query(..., description="Time period: day, week, etc.")
+@router.get("/top-kols", response_model=TopKolsResponse)
+def get_top_kols(
+    period: int = Query(
+        24, description="Filter the time period (1-720 hours) for the data end point"
+    ),
+    kolsAmount: int = Query(3, description="Number of KOLs to retrieve"),
+    tokenCategory: Optional[str] = Query(
+        None,
+        description="Filter calls by the token category. Available values: top100, top500, lowRank",
+    ),
 ):
     """
-    Fetches top-performing influencers and returns a formatted bot message.
+    Fetches top performing KOLs based on the specified parameters.
     """
-
-    # Adapt the formatter to match the new signature
-    def adapted_formatter(data):
-        return MessageFormatter.format_top_performing_kols(period, data)
-
-    return mindai_service.fetch_and_format(
-        "get_top_performing",
-        TopPerformingResponse,
-        adapted_formatter,
-        {"period": period},
+    return mindai_service.get_top_kols(
+        period=period, kolsAmount=kolsAmount, tokenCategory=tokenCategory
     )
 
 

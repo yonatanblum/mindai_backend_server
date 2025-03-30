@@ -1,10 +1,9 @@
 from utils.logger import Logger
 from utils.period_formatter import PeriodConverter
 from services.mindai.mindai_service import MindAIService
-from schemas.mindai_schemas.gainer_schemas import TopGainersResponse
 from schemas.mindai_schemas.mentioned_tokens_schemas import TopMentionedTokensResponse
-from schemas.mindai_schemas.kol_schemas import TopPerformingResponse
 from schemas.mindai_schemas.top_gainers_token_schema import TopGainersTokenResponse
+from schemas.mindai_schemas.top_kols_schema import TopKolsResponse
 from services.mindai.formatting.message_formatter import MessageFormatter
 from typing import Dict, Any, Tuple, Optional, Callable, Type
 from pydantic import BaseModel
@@ -27,11 +26,6 @@ class MindAIQueryEngine:
                 "get_top_mentioned_tokens",
                 TopMentionedTokensResponse,
                 MessageFormatter.format_top_mentioned_tokens,
-            ),
-            "top_kols": (
-                "get_top_performing",
-                TopPerformingResponse,
-                MessageFormatter.format_top_performing_kols,
             ),
         }
 
@@ -82,6 +76,23 @@ class MindAIQueryEngine:
         )
         return response.message
 
+    def process_top_kols(self, params: dict) -> str:
+        """Process top KOLs query with new parameter format."""
+        # Extract period and convert to hours
+        period_value = PeriodConverter.extract_period_from_params(params)
+        days = PeriodConverter.convert_to_days(period_value)
+        period_hours = days * 24
+
+        # Set additional parameters with defaults
+        token_category = params.get("tokenCategory", None)
+        kols_amount = params.get("kolsAmount", 3)
+
+        # Call the get_top_kols method directly
+        response = self.service.get_top_kols(
+            period=period_hours, kolsAmount=kols_amount, tokenCategory=token_category
+        )
+        return response.message
+
     def process_standard_query(self, query_type: str, params: dict) -> Optional[str]:
         """Process standard queries using fetch_and_format."""
         if query_type not in self.standard_query_mapping:
@@ -121,7 +132,8 @@ class MindAIQueryEngine:
         Supported query types:
         - "stupid_question" and "platform_info" return fixed responses
         - "top_gainers" is handled by specialized processing
-        - "top_mentions", "top_kols" are handled via fetch_and_format
+        - "top_kols" is handled by specialized processing
+        - "top_mentions" is handled via fetch_and_format
         - "best_call" is handled via fetch_best_call
         """
         try:
@@ -133,6 +145,10 @@ class MindAIQueryEngine:
             # Handle top_gainers specially
             if query_type == "top_gainers":
                 return self.process_top_gainers(params)
+
+            # Handle top_kols specially
+            if query_type == "top_kols":
+                return self.process_top_kols(params)
 
             # Try standard queries
             standard_response = self.process_standard_query(query_type, params)

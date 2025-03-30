@@ -4,6 +4,7 @@ from schemas.mindai_schemas.top_gainers_token_schema import (
     TopGainerToken,
     TopGainersTokenResponse,
 )
+from schemas.mindai_schemas.top_kols_schema import TopKolData, TopKolsResponse
 from services.mindai.mindai_client import MindAIAPIClient
 from services.mindai.formatting.message_formatter import MessageFormatter
 from typing import List, Optional, get_args, Type, Callable, Dict, Any
@@ -212,6 +213,46 @@ class MindAIService:
 
             # Return with formatted message
             return TopGainersTokenResponse(message=message, data=structured_data)
+
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"External API error: {str(e)}")
+
+    def get_top_kols(
+        self, period: int = 24, kolsAmount: int = 3, tokenCategory: str = None
+    ) -> TopKolsResponse:
+        """
+        Fetches top performing KOLs.
+
+        Args:
+            period (int): Time period in hours (1-720)
+            kolsAmount (int): Number of KOLs to return
+            tokenCategory (str): Filter by token category
+
+        Returns:
+            TopKolsResponse: Processed top performing KOLs
+        """
+        try:
+            # Get raw data from the API
+            data = self.client.get_top_kols(period, kolsAmount, tokenCategory)
+
+            if not data:
+                raise HTTPException(
+                    status_code=404, detail="No top performing KOLs available."
+                )
+
+            # Convert the data to KOL models
+            kol_models = [TopKolData(**item) for item in data]
+
+            # Format the period for the message
+            formatted_period = PeriodConverter.format_period_text(period)
+
+            # Create a formatted message using the MessageFormatter
+            message = MessageFormatter.format_top_kols(formatted_period, kol_models)
+
+            # Return with formatted message
+            return TopKolsResponse(message=message, data=kol_models)
 
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e))
