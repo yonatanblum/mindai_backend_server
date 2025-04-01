@@ -93,10 +93,35 @@ class MindAIQueryEngine:
         )
         return response.message
 
+    def process_top_mentions(self, params: dict) -> str:
+        """Process top mentioned tokens query with new parameter format."""
+        # Extract period and convert to hours
+        period_value = PeriodConverter.extract_period_from_params(params)
+        days = PeriodConverter.convert_to_days(period_value)
+        period_hours = days * 24
+
+        # Set additional parameters with defaults
+        tokens_amount = params.get("tokensAmount", 5)
+        kols = params.get("kols", True)
+        token_category = params.get("tokenCategory", None)
+
+        # Call the get_top_mentioned_tokens method directly
+        response = self.service.get_top_mentioned_tokens(
+            period=period_hours,
+            tokensAmount=tokens_amount,
+            kols=kols,
+            tokenCategory=token_category,
+        )
+        return response.message
+
     def process_standard_query(self, query_type: str, params: dict) -> Optional[str]:
         """Process standard queries using fetch_and_format."""
         if query_type not in self.standard_query_mapping:
             return None
+
+        # Special handling for top_mentions
+        if query_type == "top_mentions":
+            return self.process_top_mentions(params)
 
         fetch_method, output_schema, formatter = self.standard_query_mapping[query_type]
         period_value = PeriodConverter.extract_period_from_params(params)
@@ -133,7 +158,7 @@ class MindAIQueryEngine:
         - "stupid_question" and "platform_info" return fixed responses
         - "top_gainers" is handled by specialized processing
         - "top_kols" is handled by specialized processing
-        - "top_mentions" is handled via fetch_and_format
+        - "top_mentions" is handled via specialized processing
         - "best_call" is handled via fetch_best_call
         """
         try:
@@ -149,6 +174,10 @@ class MindAIQueryEngine:
             # Handle top_kols specially
             if query_type == "top_kols":
                 return self.process_top_kols(params)
+
+            # Handle top_mentions specially
+            if query_type == "top_mentions":
+                return self.process_top_mentions(params)
 
             # Try standard queries
             standard_response = self.process_standard_query(query_type, params)

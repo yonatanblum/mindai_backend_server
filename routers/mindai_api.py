@@ -64,21 +64,21 @@ def get_top_gainers(
 
 @router.get("/top-mentioned-tokens", response_model=TopMentionedTokensResponse)
 def get_top_mentioned_tokens(
-    period: str = Query(..., description="Time period: day, week, etc.")
+    period: int = Query(
+        24, description="Filter the time period (1-720 hours) for the data end point"
+    ),
+    tokensAmount: int = Query(5, description="Number of tokens to return"),
+    kols: bool = Query(True, description="Include KOL names in the response"),
+    tokenCategory: Optional[str] = Query(
+        None,
+        description="Filter tokens by category. Available values: top100, top500, lowRank",
+    ),
 ):
     """
-    Fetches the most mentioned tokens and returns a formatted bot message.
+    Fetches the most mentioned tokens based on the specified parameters.
     """
-
-    # Adapt the formatter to match the new signature
-    def adapted_formatter(data):
-        return MessageFormatter.format_top_mentioned_tokens(period, data)
-
-    return mindai_service.fetch_and_format(
-        "get_top_mentioned_tokens",
-        TopMentionedTokensResponse,
-        adapted_formatter,
-        {"period": period},
+    return mindai_service.get_top_mentioned_tokens(
+        period=period, tokensAmount=tokensAmount, kols=kols, tokenCategory=tokenCategory
     )
 
 

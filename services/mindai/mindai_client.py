@@ -73,12 +73,36 @@ class MindAIAPIClient:
         else:
             response.raise_for_status()
 
-    def get_top_mentioned_tokens(self, period: str) -> Dict:
+    def get_top_mentioned_tokens(
+        self,
+        period: int = 24,
+        tokensAmount: int = 5,
+        kols: bool = True,
+        tokenCategory: Optional[str] = None,
+    ) -> List[Dict]:
         """
-        Fetches the most mentioned tokens based on the specified period.
+        Fetches the most mentioned tokens based on the specified parameters.
+
+        Args:
+            period (int): Time period in hours (1-720)
+            tokensAmount (int): Number of tokens to return
+            kols (bool): Include KOL names in the response
+            tokenCategory (str, optional): Filter tokens by category
+
+        Returns:
+            List[Dict]: List of mentioned tokens
         """
-        endpoint = f"{MIND_AI_BASE_URL}/get-top-mentioned-tokens"
-        params = {"period": period}
+        endpoint = f"{MIND_AI_BASE_URL}/v1/top-mentioned-tokens"
+        params = {
+            "period": period,
+            "tokensAmount": tokensAmount,
+            "kols": str(kols).lower(),  # Convert to lowercase 'true' or 'false'
+        }
+
+        # Add tokenCategory if provided
+        if tokenCategory:
+            params["tokenCategory"] = tokenCategory
+
         response = requests.get(endpoint, params=params, headers=self.headers)
 
         if response.status_code == 200:

@@ -1,2 +1,1 @@
-from schemas.mindai_schemas.kol_schemas import InfluencerData, TopPerformingResponse
 from schemas.query_service_schemas.query_schemas import QueryIntent

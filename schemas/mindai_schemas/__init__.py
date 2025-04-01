@@ -1,4 +1,3 @@
-from .kol_schemas import TopPerformingResponse
 from .mentioned_tokens_schemas import TopMentionedTokensResponse
 from .best_call_schemas import BestCallResponse
 

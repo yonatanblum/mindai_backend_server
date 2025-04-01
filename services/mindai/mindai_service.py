@@ -1,5 +1,9 @@
 from fastapi import HTTPException
 from schemas.mindai_schemas.best_call_schemas import BestCallData, BestCallResponse
+from schemas.mindai_schemas.mentioned_tokens_schemas import (
+    MentionedTokenData,
+    TopMentionedTokensResponse,
+)
 from schemas.mindai_schemas.top_gainers_token_schema import (
     TopGainerToken,
     TopGainersTokenResponse,
@@ -253,6 +257,55 @@ class MindAIService:
 
             # Return with formatted message
             return TopKolsResponse(message=message, data=kol_models)
+
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"External API error: {str(e)}")
+
+    def get_top_mentioned_tokens(
+        self,
+        period: int = 24,
+        tokensAmount: int = 5,
+        kols: bool = True,
+        tokenCategory: Optional[str] = None,
+    ) -> TopMentionedTokensResponse:
+        """
+        Fetches the most mentioned tokens.
+
+        Args:
+            period (int): Time period in hours (1-720)
+            tokensAmount (int): Number of tokens to return
+            kols (bool): Include KOL names in the response
+            tokenCategory (str, optional): Filter tokens by category
+
+        Returns:
+            TopMentionedTokensResponse: Processed top mentioned tokens
+        """
+        try:
+            # Get raw data from the API
+            data = self.client.get_top_mentioned_tokens(
+                period, tokensAmount, kols, tokenCategory
+            )
+
+            if not data:
+                raise HTTPException(
+                    status_code=404, detail="No mentioned tokens available."
+                )
+
+            # Convert the data to token models
+            token_models = [MentionedTokenData(**item) for item in data]
+
+            # Format the period for the message
+            formatted_period = PeriodConverter.format_period_text(period)
+
+            # Create a formatted message using the MessageFormatter
+            message = MessageFormatter.format_top_mentioned_tokens(
+                formatted_period, token_models
+            )
+
+            # Return with formatted message
+            return TopMentionedTokensResponse(message=message, data=token_models)
 
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e))

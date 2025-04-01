@@ -139,44 +139,45 @@ class MessageFormatter:
     def format_top_mentioned_tokens(
         period: str, tokens: List[MentionedTokenData]
     ) -> str:
-        """Formats the response message for most mentioned tokens with market overview."""
+        """
+        Formats the response message for most mentioned tokens.
+
+        Args:
+            period (str): The time period formatted as a readable string
+            tokens (List[MentionedTokenData]): List of mentioned tokens
+
+        Returns:
+            str: Formatted message
+        """
         if not tokens:
             return f"📊 No tokens mentioned for {period}."
 
-        # Compute statistics using the new StatisticsCalculator class
-        overall_roa = StatisticsCalculator.calculate_overall_roa(tokens)
-        # success_rate = StatisticsCalculator.calculate_success_rate(tokens)
-        total_calls = StatisticsCalculator.calculate_total_calls(tokens)
-        active_kols = sum(token.influencersAmount for token in tokens)
-        market_sentiment = StatisticsCalculator.calculate_market_sentiment(tokens)
+        message_lines = [TOP_MENTIONED_TOKENS_TITLE.format(period=period.capitalize())]
 
-        message_lines = [
-            f"📊 Market Overview (Last {period.capitalize()})\n"
-            f"• Overall ROA: {overall_roa:.2f}%\n"
-            # f"• Success Rate: {success_rate:.2f}%\n"
-            f"• Total Calls: {total_calls}\n"
-            f"• Active KOLs: {active_kols}\n"
-            f"• Market Sentiment: {market_sentiment}\n"
-        ]
-
-        # ROA Change (mocked for now, replace with actual calculation)
-        roa_change = overall_roa  # Assuming it's based on overall ROA change
-        message_lines.append(f"\n📈 ROA Change: {roa_change:.2f}%\n")
-
-        message_lines.append("\n🔥 Trending Coins")
-
-        for token in tokens[:5]:  # Show top 5 trending tokens
+        for i, token in enumerate(tokens[:5]):  # Show top 5 tokens
             token_lines = [
-                f"• ${token.symbol.upper()}",
+                f"• #{i+1} ${token.tokenSymbol.upper()} ({token.tokenName})",
+                MessageFormatter._format_field("Total Mentions", token.totalCalls),
+                MessageFormatter._format_field("Unique KOLs", token.uniqueKols),
                 MessageFormatter._format_field(
-                    "ROA Change", token.monthlyChange, is_percentage=True
+                    "Daily Change", token.dailyChange, is_percentage=True
                 ),
-                MessageFormatter._format_field("Calls", token.cashTagMentions),
-                MessageFormatter._format_field("KOLs", token.influencersAmount),
+                MessageFormatter._format_field(
+                    "Weekly Change", token.weeklyChange, is_percentage=True
+                ),
+                MessageFormatter._format_field(
+                    "Monthly Change", token.monthlyChange, is_percentage=True
+                ),
             ]
-            message_lines.append(
-                "\n".join(filter(None, token_lines))
-            )  # Remove empty fields
+
+            # Add KOL names if available
+            if token.kolNames and len(token.kolNames) > 0:
+                kol_text = ", ".join(token.kolNames[:3])
+                if len(token.kolNames) > 3:
+                    kol_text += f" and {len(token.kolNames) - 3} more"
+                token_lines.append(f"   • Notable KOLs: {kol_text}")
+
+            message_lines.append("\n".join(filter(None, token_lines)) + "\n")
 
         return "\n".join(message_lines)
 
