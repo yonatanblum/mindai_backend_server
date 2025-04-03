@@ -31,7 +31,7 @@ def get_all_token_data() -> List[dict]:
 
 def format_token_message(item: Dict) -> str:
     """
-    Format token data into a readable message.
+    Format token data with original style but updated field names in bold and no timestamp.
 
     Args:
         item (Dict): Token data dictionary
@@ -41,10 +41,9 @@ def format_token_message(item: Dict) -> str:
     """
     return (
         f"🧠 *Alpha Token Alert!*\n"
-        f"• *Token:* {item['tokenName']} ({item['tokenSymbol']})\n"
-        f"• *Address:* `{item['tokenAddress']}`\n"
-        f"• *Chain ID:* {item['chain']}\n"
-        f"• *Amount:* {item['amount']}\n"
-        f"• *FDV:* ${item['fdv']:,}\n"
-        f"• *Timestamp:* {item['timestamp']}"
+        f"• *Token:* ${item['tokenSymbol']}\n"
+        f"• *Contract:* {item['tokenAddress']}\n"
+        f"• *Smart Wallets:* {item['amount']}\n"
+        f"• *Chain:* {item['chain']}\n"
+        f"• *FDV:* ${item['fdv']:,}"
     )
