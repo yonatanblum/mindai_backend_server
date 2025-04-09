@@ -31,8 +31,7 @@ def get_all_token_data() -> List[dict]:
 
 def format_token_message(item: Dict) -> str:
     """
-    Format token data with original style, making contract address easily copyable
-    and the title bold.
+    Format token data into a message, prioritizing chainName if available.
 
     Args:
         item (Dict): Token data dictionary
@@ -40,11 +39,14 @@ def format_token_message(item: Dict) -> str:
     Returns:
         str: Formatted message string
     """
+    # Use chainName if available, otherwise use chain
+    chain_display = item.get("chainName") if item.get("chainName") else item["chain"]
+
     return (
         f"🧠 *Alpha Token Alert!*\n"
         f"• *Token:* ${item['tokenSymbol']}\n"
         f"• *Contract:* `{item['tokenAddress']}`\n"
         f"• *Smart Wallets:* {item['amount']}\n"
-        f"• *Chain:* {item['chain']}\n"
+        f"• *Chain:* {chain_display}\n"
         f"• *FDV:* ${item['fdv']:,}"
     )
